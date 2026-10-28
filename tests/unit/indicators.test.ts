@@ -62,6 +62,22 @@ describe('BuiltInIndicator', () => {
 });
 
 describe('parseIndicatorDefinition', () => {
+  it('reads compiled private scripts and features from hidden metadata inputs', () => {
+    const indicator = parseIndicatorDefinition({ metaInfo: {
+      inputs: [
+        { id: 'text', defval: 'compiled-private-script', type: 'text' },
+        { id: 'pineFeatures', defval: '{"indicator":1}', type: 'text' },
+        { id: 'in_0', name: 'Show', defval: true, type: 'bool' },
+      ],
+    } }, 'USER;test', '2.0');
+    expect(indicator.script).toBe('compiled-private-script');
+    expect(Object.keys(indicator.inputs)).toEqual(['pineFeatures', 'in_0']);
+    expect(indicator.clone().toStudyInputs()).toMatchObject({
+      text: 'compiled-private-script', pineFeatures: { v: '{"indicator":1}', f: false, t: 'text' },
+      in_0: { v: true, f: false, t: 'bool' },
+    });
+  });
+
   it('builds inputs and unique plot names from pine-facade metadata', () => {
     const indicator = parseIndicatorDefinition({
       ilTemplate: 'IL',
